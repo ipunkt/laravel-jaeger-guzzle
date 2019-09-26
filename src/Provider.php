@@ -17,7 +17,6 @@ class Provider extends ServiceProvider
 
     public function register()
     {
-        dd('JaegerGuzzleProvider');
         $this->mergeConfigFrom(
             __DIR__ . '/../config/jaeger-guzzle.php', 'jaeger-guzzle'
         );
@@ -28,14 +27,17 @@ class Provider extends ServiceProvider
 
         $this->app->bind($this->middlewareContainerIdentifier, function() {
             return Middleware::mapRequest( function(RequestInterface $request) {
+
                 /**
                  * @var Context $context
                  */
                 $context = app('current-context');
                 $data = [];
                 $context->inject($data);
+                $jsonData = json_encode($data);
+                $jsonDataEncoded = urlencode($jsonData);
 
-                return $request->withHeader('X-TRACE', json_encode($data));
+                return $request->withHeader('X-TRACE', $jsonDataEncoded );
             });
         });
 
@@ -56,7 +58,7 @@ class Provider extends ServiceProvider
 
     private function registerHandlerStack(): void
     {
-        if( !config('jaeger-guzzle::register-handler') )
+        if( !config('jaeger-guzzle.register-handler') )
             return;
 
         $this->app->bind(HandlerStack::class, function () {
@@ -66,10 +68,10 @@ class Provider extends ServiceProvider
 
     private function registerClient(): void
     {
-        if( !config('jaeger-guzzle::register-client') )
+        if( !config('jaeger-guzzle.register-client') )
             return;
 
-        $this->app->bind(Client::class, function (Client $client, $app) {
+        $this->app->bind(Client::class, function ($app) {
             return new Client([
                 'handler' => $app->make(HandlerStack::class),
             ]);
