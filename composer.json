@@ -29,7 +29,7 @@
   "extra": {
     "laravel": {
         "providers": [
-            "Ipunkt\\LaravelJaeger\\Provider"
+            "Ipunkt\\LaravelJaegerGuzzle\\Provider"
         ]
     }
   },
